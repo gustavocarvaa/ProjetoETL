@@ -1,5 +1,4 @@
 import cx_Oracle as db
-import petl as etl
 
 if __name__ == '__main__':
 
@@ -12,8 +11,8 @@ if __name__ == '__main__':
     cursor_dw = conexao_dw.cursor()
 
 
-    def dm_socio(self):
-        tb_socio = cursor_op.execute('select cod_soc, nom_soc , dsc_tps from socios join tipos_socios using(cod_tps);')
+    def dm_socio():
+        tb_socio = cursor_op.execute('select cod_soc, nom_soc , dsc_tps from socios join tipos_socios using(cod_tps)')
         tbs_socio = tb_socio.fetchall()
 
         for l in tbs_socio:
@@ -54,18 +53,17 @@ if __name__ == '__main__':
         tbs_tempo = tb_tempo.fetchall()
         tabela_result = []
         id_tempo = 1
-        turno = ''
 
         for l in tbs_tempo:
             #if(l)
-            tabela_result.append([id_tempo, l, turno])
+            tabela_result.append([id_tempo, int(l[0]), int(l[1]), l[2].replace('/', ''),l[3],l[4],l[5],l[6],l[7],l[8],l[9]])
             id_tempo += 1
 
 
         for l in tabela_result:
             cursor_dw.execute("insert into dm_tempo(id_tempo, nu_ano, nu_mes, nu_anomes, sg_mes, nm_mesano, nm_mes, "
                               "nu_dia, dt_tempo, nu_hora, turno) "
-                              "values (:1,:2,:3, :4, :5, :6, :7, :8, :9, :10, :11)", l)
+                              "values (:1,:2,:3, :4, :5, :6, :7, :8, :9, :10, :11)", {"1":l[0],"2": l[1],"3":l[2],"4": int(l[3]),"5":l[4],"6":l[5],"7":l[6],"8":int(l[7]),"9":l[8],"10":int(l[9]),"11":l[10]})
 
     def ft_locacoes():
         ft_locacoes = cursor_dw.execute(
@@ -76,11 +74,8 @@ if __name__ == '__main__':
         for l in tbs_locacoes:
             cursor_dw.execute("insert into ft_locacoes(id_grav, uf_grav, nac_bras, nom_grav) values (:1,:2,:3, :4)", l)
 
-
-
-
-
-    #conexao_dw.commit()
+    dm_tempo()
+    conexao_dw.commit()
     cursor_dw.close()
     cursor_op.close()
     conexao_dw.close()
